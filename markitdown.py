@@ -4,6 +4,7 @@ import markdown
 import google.generativeai as genai
 from transformers import pipeline
 from PyPDF2 import PdfReader
+from docx import Document
 
 st.set_page_config(page_title="Markdown Lib")
 
@@ -15,7 +16,7 @@ api_key = st.sidebar.text_input("Enter your OpenAI API Key", type="password")
 gemini_api_key = st.sidebar.text_input("Enter your Gemini API Key", type="password")
 meta_model_path = st.sidebar.text_input("Enter Meta AI (LLaMA) Model Path", type="default")
 
-uploaded_file = st.file_uploader("Choose a File", type=["txt", "pdf"])
+uploaded_file = st.file_uploader("Choose a File", type=["txt", "pdf","docx"])
 
 if st.button("Process File"):
     if not uploaded_file:
@@ -25,6 +26,7 @@ if st.button("Process File"):
             file_extension = uploaded_file.name.split(".")[-1]
             if file_extension == "txt":
                 file_content = uploaded_file.read().decode("utf-8")
+                
             elif file_extension == "pdf":
                 pdf_reader = PdfReader(uploaded_file)
                 file_content = " "
@@ -32,6 +34,12 @@ if st.button("Process File"):
                     text = page.extract_text()
                     if text:
                         file_content += text
+                        
+            elif file_extension == "docx":        # loop for docx
+                doc = Document(uploaded_file)
+                file_content = " "
+                for paragraph in doc.paragraphs:
+                    file_content += paragraph.text
                 
             else:
                 st.error("Unsupported file type!")
